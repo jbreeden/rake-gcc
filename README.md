@@ -42,7 +42,7 @@ build_target :debug do
       "/some/other/library/include"
     ]
     
-    # And of course, what your source files are. 
+    # And of course, you can specify what your source files are. 
     # (This takes anything you can give to a Rake::FileList)
     sources "src/**/*.{c,cpp}"
   end
