@@ -6,9 +6,11 @@ A DSL for using gcc from rake.
 Usage
 =====
 
-Here is an example rage-gcc file:
+Here is an example rakefile using rake-gcc:
 
 ```ruby
+require 'rake_gcc'
+include RakeGcc
 
 build_target :debug do
   compiler "g++"
@@ -55,6 +57,9 @@ end
 Here it is again, fully explained:
 
 ```ruby
+# Requiring the library and including the DSL methods.
+require 'rake_gcc'
+include RakeGcc
 
 # `build_target` creates a new... build target.
 # - All tasks defined for this target are namespaced under the given name,
