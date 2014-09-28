@@ -6,6 +6,54 @@ A DSL for using gcc from rake.
 Usage
 =====
 
+Here is an example rage-gcc file:
+
+```ruby
+
+build_target :debug do
+  compiler "g++"
+  
+  before do
+    sh "windres \"-I#{$WXWIDGETS}/include\" resources.rc #{@build_target.name}/obj/resources.o"
+  end
+  
+  compile do
+    define :DEBUG
+    
+    flag "-std=c++11"
+    
+    search [
+      "include",
+      "/some/other/library/include"
+    ]
+    
+    sources "src/**/*.{c,cpp}"
+  end
+  
+  link do
+    search "/some/other/library/lib",
+      "../and/yet/another/lib"
+    
+    object "#{@build_target.name}/obj/resources.o"
+    
+    libs "otherlibrary", "yetanother"
+    
+    artifact "app.exe"
+  end
+  
+  copy "app.xrc"
+end
+
+build_target :release, :debug do
+  compile do
+    undefine :DEBUG
+    define :RELEASE
+  end
+end
+```
+
+Here it is again, fully explained:
+
 ```ruby
 
 # `build_target` creates a new... build target.
