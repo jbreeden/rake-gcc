@@ -46,7 +46,9 @@ module RakeGcc
       :compiler,
       :directories,
       :compile_options,
+      :compile_task_dependencies,
       :link_options,
+      :link_task_dependencies,
       :before_block,
       :after_block,
       :file_copy_lists,
@@ -58,6 +60,8 @@ module RakeGcc
       @compiler = "gcc"
       @directories = ["#{name}/obj"]
       @compile_options = CompileOptions.new
+      @compile_task_dependencies = []
+      @link_task_dependencies = []
       @link_options = LinkOptions.new
       @file_copy_lists = {}
     end
@@ -73,7 +77,7 @@ module RakeGcc
         self.before_block.call() if self.before_block
       end
       
-      task :compile => obj_files
+      task :compile => (@compile_task_dependencies + obj_files)
       
       define_link_artifact_task(obj_files)
       
@@ -83,7 +87,7 @@ module RakeGcc
         self.after_block.call() if self.after_block
       end
       
-      task :build => [all_directories, :before, :compile, "#{name}/#{@link_options.artifact}", copied_files, :after].flatten do
+      task :build => [all_directories, :before, :compile, link_artifact, copied_files, :after].flatten do
         puts "Build Complete"
       end
       
@@ -105,12 +109,16 @@ module RakeGcc
     end
     
     def define_link_artifact_task(obj_files)
-      file "#{name}/#{@link_options.artifact}" => obj_files do
+      file link_artifact => (@link_task_dependencies + obj_files) do
         flags = @link_options.flags.join(' ')
         link_libraries = @link_options.libs.map { |lib| "-l#{lib}" }.join(' ')
         search_path = @link_options.dirs.map { |dir| "-L#{dir}" }.join(' ')
         sh "#{@compiler} #{flags} #{search_path} #{obj_files.join(' ')} #{link_libraries} -o #{name}/#{@link_options.artifact}"
       end
+    end
+    
+    def link_artifact
+      "#{name}/#{@link_options.artifact}"
     end
     
     def define_file_copy_tasks
@@ -197,12 +205,14 @@ module RakeGcc
       end
     end
     
-    def compile(&block)
+    def compile(*dependencies, &block)
+      @build_target.compile_task_dependencies += dependencies.flatten
       compile_context = CompileDslContext.new(@build_target)
       compile_context.instance_eval &block
     end
     
-    def link(&block)
+    def link(*dependencies, &block)
+      @build_target.link_task_dependencies += dependencies.flatten
       link_context = LinkDslContext.new(@build_target)
       link_context.instance_eval &block
     end
@@ -212,7 +222,8 @@ module RakeGcc
     attr_accessor :flags,
       :defines,
       :include_dirs,
-      :sources
+      :sources,
+      :dependencies
       
     def initialize
       @flags = []
