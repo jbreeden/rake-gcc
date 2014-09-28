@@ -47,7 +47,7 @@ build_target :debug do
     sources "src/**/*.{c,cpp}"
   end
   
-  # You specify linker options in the `compile` block...
+  # You specify linker options in the `link` block...
   link do
     # ...like where to search for library files. (-L/some/other/library/lib ...)
     search "/some/other/library/lib",
