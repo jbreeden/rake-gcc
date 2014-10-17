@@ -154,7 +154,6 @@ For a full working example, check out the [Rakefile](https://github.com/jbreeden
 TODO
 ====
 
-- Add `desc` blocks so tasks show up with `rake -T`
 - Split classes/module into separate files
 - Gemify
 
